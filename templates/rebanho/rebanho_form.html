@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Rebanho - Sistema de Gerenciamento de Rebanhos{% endblock %}
+{% block nav_rebanhos %}active{% endblock %}
+{% block page_title %}Cadastro de rebanho{% endblock %}
+{% block page_subtitle %}Vincule o rebanho ao talhao e registre dados de manejo.{% endblock %}
+
+{% block content %}
+  <form class="card" method="post">
+    {% csrf_token %}
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="nome">Nome</label>
+        <input class="input" id="nome" name="nome" value="{{ rebanho.nome|default:'' }}" required>
+      </div>
+      <div class="form-field">
+        <label for="talhao">Talhao</label>
+        <select class="select" id="talhao" name="talhao" required>
+          <option value="">Selecione</option>
+          {% for talhao in talhoes %}
+            <option value="{{ talhao.id_talhao }}" {% if rebanho.talhao.id_talhao == talhao.id_talhao %}selected{% endif %}>{{ talhao.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="quantidade_animais">Quantidade de animais</label>
+        <input class="input" id="quantidade_animais" name="quantidade_animais" type="number" min="0" value="{{ rebanho.quantidade_animais|default:'' }}">
+      </div>
+      <div class="form-field">
+        <label for="tipo_criacao">Tipo de criacao</label>
+        <input class="input" id="tipo_criacao" name="tipo_criacao" value="{{ rebanho.tipo_criacao|default:'' }}">
+      </div>
+      <div class="form-field full">
+        <label for="observacoes">Observacoes</label>
+        <textarea class="textarea" id="observacoes" name="observacoes">{{ rebanho.observacoes|default:'' }}</textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="button secondary" href="{% url 'rebanho_lista' %}">Cancelar</a>
+      <button class="button" type="submit">Salvar rebanho</button>
+    </div>
+  </form>
+{% endblock %}

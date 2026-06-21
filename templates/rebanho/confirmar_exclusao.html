@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Excluir registro - Sistema de Gerenciamento de Rebanhos{% endblock %}
+{% block page_title %}Excluir registro{% endblock %}
+{% block page_subtitle %}Confirme a remocao definitiva deste cadastro.{% endblock %}
+
+{% block content %}
+  <form class="card" method="post">
+    {% csrf_token %}
+    <p>Tem certeza que deseja excluir <strong>{{ object }}</strong>?</p>
+    <div class="actions">
+      <a class="button secondary" href="{{ request.META.HTTP_REFERER|default:'/' }}">Cancelar</a>
+      <button class="button danger" type="submit">Excluir</button>
+    </div>
+  </form>
+{% endblock %}

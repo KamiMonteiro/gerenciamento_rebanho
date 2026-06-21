@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Usuario - Sistema de Gerenciamento de Rebanhos{% endblock %}
+{% block nav_usuarios %}active{% endblock %}
+{% block page_title %}Cadastro de usuario{% endblock %}
+{% block page_subtitle %}Defina dados de acesso, tipo de usuario, permissao e status.{% endblock %}
+
+{% block content %}
+  <form class="card" method="post">
+    {% csrf_token %}
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="nome">Nome</label>
+        <input class="input" id="nome" name="nome" value="{{ usuario.nome|default:'' }}" required>
+      </div>
+      <div class="form-field">
+        <label for="email">Email</label>
+        <input class="input" id="email" name="email" type="email" value="{{ usuario.email|default:'' }}" required>
+      </div>
+      <div class="form-field">
+        <label for="senha">Senha</label>
+        <input class="input" id="senha" name="senha" type="password" {% if not usuario %}required{% endif %}>
+      </div>
+      <div class="form-field">
+        <label for="tipo_usuario">Tipo de usuario</label>
+        <select class="select" id="tipo_usuario" name="tipo_usuario" required>
+          <option value="USUARIO" {% if usuario.tipo_usuario == "USUARIO" %}selected{% endif %}>Usuario</option>
+          <option value="ADMIN" {% if usuario.tipo_usuario == "ADMIN" %}selected{% endif %}>Admin</option>
+        </select>
+      </div>
+      <div class="form-field full">
+        <label for="permissao">Permissao</label>
+        <textarea class="textarea" id="permissao" name="permissao">{{ usuario.permissao|default:'' }}</textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="button secondary" href="{% url 'usuario_lista' %}">Cancelar</a>
+      <button class="button" type="submit">Salvar usuario</button>
+    </div>
+  </form>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Estoque - Sistema de Gerenciamento de Rebanhos{% endblock %}
+{% block page_title %}Cadastro de estoque{% endblock %}
+{% block page_subtitle %}Use este formulario para produtos ou alimentos do rebanho.{% endblock %}
+
+{% block content %}
+  <form class="card" method="post">
+    {% csrf_token %}
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="nome">Nome</label>
+        <input class="input" id="nome" name="nome" value="{{ item.nome|default:'' }}" required>
+      </div>
+      <div class="form-field">
+        <label for="tipo">Tipo</label>
+        <input class="input" id="tipo" name="tipo" value="{{ item.tipo|default:'' }}">
+      </div>
+      <div class="form-field">
+        <label for="quantidade">Quantidade</label>
+        <input class="input" id="quantidade" name="quantidade" type="number" step="0.01" min="0" value="{{ item.quantidade|default:item.quantidade_estoque|default:'' }}" required>
+      </div>
+      <div class="form-field">
+        <label for="unidade_medida">Unidade de medida</label>
+        <input class="input" id="unidade_medida" name="unidade_medida" value="{{ item.unidade_medida|default:'' }}">
+      </div>
+      <div class="form-field">
+        <label for="data_validade">Data de validade</label>
+        <input class="input" id="data_validade" name="data_validade" type="date" value="{{ item.data_validade|date:'Y-m-d' }}">
+      </div>
+      <div class="form-field">
+        <label for="fornecedor">Fornecedor</label>
+        <input class="input" id="fornecedor" name="fornecedor" value="{{ item.fornecedor|default:'' }}">
+      </div>
+      <div class="form-field full">
+        <label for="observacoes">Observacoes</label>
+        <textarea class="textarea" id="observacoes" name="observacoes">{{ item.observacoes|default:'' }}</textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="button secondary" href="{{ voltar_url }}">Cancelar</a>
+      <button class="button" type="submit">Salvar estoque</button>
+    </div>
+  </form>
+{% endblock %}

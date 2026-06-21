@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Painel - Sistema de Gerenciamento de Rebanhos{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+{% block page_title %}Painel do rebanho{% endblock %}
+{% block page_subtitle %}Resumo operacional de producao, estoque e saude animal.{% endblock %}
+
+{% block content %}
+  <section class="section">
+    <div class="grid grid-4">
+      <article class="card metric">
+        <span>Animais ativos</span>
+        <strong>{{ total_animais|default:"0" }}</strong>
+        <small>{{ animais_em_observacao|default:"0" }} em observacao</small>
+      </article>
+      <article class="card metric">
+        <span>Rebanhos cadastrados</span>
+        <strong>{{ total_rebanhos|default:"0" }}</strong>
+        <small>{{ total_talhoes|default:"0" }} talhoes ocupados</small>
+      </article>
+      <article class="card metric">
+        <span>Produtos em estoque</span>
+        <strong>{{ total_produtos|default:"0" }}</strong>
+        <small>{{ produtos_baixo_estoque|default:"0" }} com estoque baixo</small>
+      </article>
+      <article class="card metric">
+        <span>Registros de sanidade</span>
+        <strong>{{ total_sanidades|default:"0" }}</strong>
+        <small>{{ tratamentos_abertos|default:"0" }} tratamentos ativos</small>
+      </article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <h2>Atalhos de cadastro</h2>
+    </div>
+    <div class="grid grid-3">
+      <a class="card" href="{% url 'animal_criar' %}">
+        <strong>Novo animal</strong>
+        <p>Cadastre identificacao, raca, sexo, peso e rebanho.</p>
+      </a>
+      <a class="card" href="{% url 'sanidade_criar' %}">
+        <strong>Novo registro sanitario</strong>
+        <p>Registre exames, vacinas, medicamentos ou enfermidades.</p>
+      </a>
+      <a class="card" href="{% url 'produto_criar' %}">
+        <strong>Novo produto</strong>
+        <p>Controle estoque, unidade, fornecedor e validade.</p>
+      </a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <h2>Ultimos animais cadastrados</h2>
+      <a class="button secondary" href="{% url 'animal_lista' %}">Ver todos</a>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Identificacao</th>
+            <th>Raca</th>
+            <th>Sexo</th>
+            <th>Rebanho</th>
+            <th>Status</th>
+            <th>Acoes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for animal in ultimos_animais %}
+            <tr>
+              <td>{{ animal.identificacao }}</td>
+              <td>{{ animal.raca }}</td>
+              <td>{{ animal.sexo }}</td>
+              <td>{{ animal.rebanho.nome }}</td>
+              <td><span class="badge">{{ animal.status_saude }}</span></td>
+              <td><a class="button secondary" href="{% url 'animal_detalhe' animal.id_animal %}">Abrir</a></td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">Nenhum animal cadastrado ainda.</div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

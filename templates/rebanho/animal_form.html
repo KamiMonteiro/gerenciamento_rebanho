@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Animal - Sistema de Gerenciamento de Rebanhos{% endblock %}
+{% block nav_animais %}active{% endblock %}
+{% block page_title %}{{ form_title|default:"Cadastro de animal" }}{% endblock %}
+{% block page_subtitle %}Preencha os dados principais do animal e vincule ao rebanho correto.{% endblock %}
+
+{% block content %}
+  <form class="card" method="post">
+    {% csrf_token %}
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="identificacao">Identificacao</label>
+        <input class="input" id="identificacao" name="identificacao" value="{{ animal.identificacao|default:'' }}" required>
+      </div>
+      <div class="form-field">
+        <label for="rebanho">Rebanho</label>
+        <select class="select" id="rebanho" name="rebanho" required>
+          <option value="">Selecione</option>
+          {% for rebanho in rebanhos %}
+            <option value="{{ rebanho.id_rebanho }}" {% if animal.rebanho.id_rebanho == rebanho.id_rebanho %}selected{% endif %}>{{ rebanho.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="raca">Raca</label>
+        <input class="input" id="raca" name="raca" value="{{ animal.raca|default:'' }}" required>
+      </div>
+      <div class="form-field">
+        <label for="sexo">Sexo</label>
+        <select class="select" id="sexo" name="sexo" required>
+          <option value="">Selecione</option>
+          <option value="Macho" {% if animal.sexo == "Macho" %}selected{% endif %}>Macho</option>
+          <option value="Femea" {% if animal.sexo == "Femea" %}selected{% endif %}>Femea</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="idade">Idade</label>
+        <input class="input" id="idade" name="idade" type="number" min="0" value="{{ animal.idade|default:'' }}">
+      </div>
+      <div class="form-field">
+        <label for="peso">Peso</label>
+        <input class="input" id="peso" name="peso" type="number" step="0.01" min="0" value="{{ animal.peso|default:'' }}">
+      </div>
+      <div class="form-field">
+        <label for="data_nascimento">Data de nascimento</label>
+        <input class="input" id="data_nascimento" name="data_nascimento" type="date" value="{{ animal.data_nascimento|date:'Y-m-d' }}">
+      </div>
+      <div class="form-field">
+        <label for="status_saude">Status de saude</label>
+        <select class="select" id="status_saude" name="status_saude">
+          <option value="Saudavel" {% if animal.status_saude == "Saudavel" %}selected{% endif %}>Saudavel</option>
+          <option value="Observacao" {% if animal.status_saude == "Observacao" %}selected{% endif %}>Observacao</option>
+          <option value="Tratamento" {% if animal.status_saude == "Tratamento" %}selected{% endif %}>Tratamento</option>
+        </select>
+      </div>
+      <div class="form-field full">
+        <label for="observacoes">Observacoes</label>
+        <textarea class="textarea" id="observacoes" name="observacoes">{{ animal.observacoes|default:'' }}</textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="button secondary" href="{% url 'animal_lista' %}">Cancelar</a>
+      <button class="button" type="submit">Salvar animal</button>
+    </div>
+  </form>
+{% endblock %}

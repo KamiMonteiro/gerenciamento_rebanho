@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Sistema de Gerenciamento de Rebanhos</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #f6f8f5;
+      color: #1f2a24;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .login-card {
+      width: min(420px, calc(100vw - 32px));
+      background: #fff;
+      border: 1px solid #d9e3d7;
+      border-radius: 8px;
+      padding: 28px;
+      box-shadow: 0 16px 36px rgba(42, 61, 48, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 24px;
+    }
+
+    p {
+      margin: 0 0 22px;
+      color: #68756d;
+    }
+
+    label {
+      display: block;
+      margin: 14px 0 7px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid #d9e3d7;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font: inherit;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      min-height: 44px;
+      margin-top: 20px;
+      border: 0;
+      border-radius: 8px;
+      background: #2f6f4e;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .error {
+      margin-top: 14px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #ffe4df;
+      color: #94382f;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <main class="login-card">
+    <h1>Entrar no SGR</h1>
+    <p>Acesse o sistema de gerenciamento de rebanhos.</p>
+    <form method="post">
+      {% csrf_token %}
+      <label for="{{ form.username.id_for_label }}">Usuario</label>
+      {{ form.username }}
+      <label for="{{ form.password.id_for_label }}">Senha</label>
+      {{ form.password }}
+      {% if form.errors %}
+        <div class="error">Usuario ou senha invalidos.</div>
+      {% endif %}
+      <button type="submit">Entrar</button>
+    </form>
+  </main>
+</body>
+</html>

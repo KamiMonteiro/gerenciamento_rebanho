@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Detalhe de saude - Sistema de Gerenciamento de Rebanhos{% endblock %}
+{% block page_title %}{{ tipo|title }}{% endblock %}
+{% block page_subtitle %}Cadastro vinculado ao registro de sanidade do animal.{% endblock %}
+
+{% block content %}
+  <form class="card" method="post">
+    {% csrf_token %}
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="sanidade">Registro de sanidade</label>
+        <select class="select" id="sanidade" name="sanidade" required>
+          <option value="">Selecione</option>
+          {% for sanidade in sanidades %}
+            <option value="{{ sanidade.id_sanidade }}" {% if item.sanidade.id_sanidade == sanidade.id_sanidade %}selected{% endif %}>
+              {{ sanidade.animal.identificacao }} - {{ sanidade.data_registro|date:"d/m/Y" }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="nome">Nome</label>
+        <input class="input" id="nome" name="nome" value="{{ item.nome|default:'' }}" required>
+      </div>
+
+      {% if tipo == "exame" %}
+        <div class="form-field">
+          <label for="tipo_exame">Tipo</label>
+          <input class="input" id="tipo_exame" name="tipo" value="{{ item.tipo|default:'' }}">
+        </div>
+        <div class="form-field">
+          <label for="data_realizacao">Data de realizacao</label>
+          <input class="input" id="data_realizacao" name="data_realizacao" type="date" value="{{ item.data_realizacao|date:'Y-m-d' }}">
+        </div>
+        <div class="form-field">
+          <label for="resultado">Resultado</label>
+          <input class="input" id="resultado" name="resultado" value="{{ item.resultado|default:'' }}">
+        </div>
+        <div class="form-field">
+          <label for="status">Status</label>
+          <input class="input" id="status" name="status" value="{{ item.status|default:'' }}">
+        </div>
+      {% endif %}
+
+      {% if tipo == "vacina" %}
+        <div class="form-field">
+          <label for="dose">Dose</label>
+          <input class="input" id="dose" name="dose" value="{{ item.dose|default:'' }}">
+        </div>
+        <div class="form-field">
+          <label for="data_aplicacao">Data de aplicacao</label>
+          <input class="input" id="data_aplicacao" name="data_aplicacao" type="date" value="{{ item.data_aplicacao|date:'Y-m-d' }}">
+        </div>
+        <div class="form-field">
+          <label for="proxima_dose">Proxima dose</label>
+          <input class="input" id="proxima_dose" name="proxima_dose" type="date" value="{{ item.proxima_dose|date:'Y-m-d' }}">
+        </div>
+        <div class="form-field">
+          <label for="status">Status</label>
+          <input class="input" id="status" name="status" value="{{ item.status|default:'' }}">
+        </div>
+      {% endif %}
+
+      {% if tipo == "medicamento" %}
+        <div class="form-field">
+          <label for="dosagem">Dosagem</label>
+          <input class="input" id="dosagem" name="dosagem" value="{{ item.dosagem|default:'' }}">
+        </div>
+        <div class="form-field">
+          <label for="periodo_tratamento">Periodo de tratamento</label>
+          <input class="input" id="periodo_tratamento" name="periodo_tratamento" value="{{ item.periodo_tratamento|default:'' }}">
+        </div>
+        <div class="form-field">
+          <label for="data_inicio">Data de inicio</label>
+          <input class="input" id="data_inicio" name="data_inicio" type="date" value="{{ item.data_inicio|date:'Y-m-d' }}">
+        </div>
+        <div class="form-field">
+          <label for="data_fim">Data de fim</label>
+          <input class="input" id="data_fim" name="data_fim" type="date" value="{{ item.data_fim|date:'Y-m-d' }}">
+        </div>
+      {% endif %}
+
+      {% if tipo == "enfermidade" %}
+        <div class="form-field full">
+          <label for="descricao">Descricao</label>
+          <textarea class="textarea" id="descricao" name="descricao">{{ item.descricao|default:'' }}</textarea>
+        </div>
+        <div class="form-field">
+          <label for="data_diagnostico">Data de diagnostico</label>
+          <input class="input" id="data_diagnostico" name="data_diagnostico" type="date" value="{{ item.data_diagnostico|date:'Y-m-d' }}">
+        </div>
+        <div class="form-field">
+          <label for="gravidade">Gravidade</label>
+          <input class="input" id="gravidade" name="gravidade" value="{{ item.gravidade|default:'' }}">
+        </div>
+        <div class="form-field">
+          <label for="status_tratamento">Status do tratamento</label>
+          <input class="input" id="status_tratamento" name="status_tratamento" value="{{ item.status_tratamento|default:'' }}">
+        </div>
+      {% endif %}
+
+      <div class="form-field full">
+        <label for="observacoes">Observacoes</label>
+        <textarea class="textarea" id="observacoes" name="observacoes">{{ item.observacoes|default:'' }}</textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="button secondary" href="{{ voltar_url }}">Cancelar</a>
+      <button class="button" type="submit">Salvar</button>
+    </div>
+  </form>
+{% endblock %}

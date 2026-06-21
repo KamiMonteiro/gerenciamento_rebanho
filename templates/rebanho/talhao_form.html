@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Talhao - Sistema de Gerenciamento de Rebanhos{% endblock %}
+{% block nav_talhoes %}active{% endblock %}
+{% block page_title %}Cadastro de talhao{% endblock %}
+{% block page_subtitle %}Controle localizacao, capacidade e area disponivel para ocupacao do rebanho.{% endblock %}
+
+{% block content %}
+  <form class="card" method="post">
+    {% csrf_token %}
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="nome">Nome</label>
+        <input class="input" id="nome" name="nome" value="{{ talhao.nome|default:'' }}" required>
+      </div>
+      <div class="form-field">
+        <label for="localizacao">Localizacao</label>
+        <input class="input" id="localizacao" name="localizacao" value="{{ talhao.localizacao|default:'' }}" required>
+      </div>
+      <div class="form-field">
+        <label for="capacidade">Capacidade</label>
+        <input class="input" id="capacidade" name="capacidade" type="number" min="0" value="{{ talhao.capacidade|default:'' }}">
+      </div>
+      <div class="form-field">
+        <label for="area_total">Area total</label>
+        <input class="input" id="area_total" name="area_total" type="number" step="0.01" min="0" value="{{ talhao.area_total|default:'' }}">
+      </div>
+      <div class="form-field full">
+        <label for="observacoes">Observacoes</label>
+        <textarea class="textarea" id="observacoes" name="observacoes">{{ talhao.observacoes|default:'' }}</textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="button secondary" href="{% url 'talhao_lista' %}">Cancelar</a>
+      <button class="button" type="submit">Salvar talhao</button>
+    </div>
+  </form>
+{% endblock %}

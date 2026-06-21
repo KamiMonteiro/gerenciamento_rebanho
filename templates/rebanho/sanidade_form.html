@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Sanidade - Sistema de Gerenciamento de Rebanhos{% endblock %}
+{% block nav_sanidade %}active{% endblock %}
+{% block page_title %}Registro sanitario{% endblock %}
+{% block page_subtitle %}Controle exames, vacinas, medicamentos e enfermidades do animal.{% endblock %}
+
+{% block content %}
+  <form class="card" method="post">
+    {% csrf_token %}
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="animal">Animal</label>
+        <select class="select" id="animal" name="animal" required>
+          <option value="">Selecione</option>
+          {% for animal in animais %}
+            <option value="{{ animal.id_animal }}" {% if sanidade.animal.id_animal == animal.id_animal %}selected{% endif %}>{{ animal.identificacao }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="data_registro">Data do registro</label>
+        <input class="input" id="data_registro" name="data_registro" type="date" value="{{ sanidade.data_registro|date:'Y-m-d' }}" required>
+      </div>
+      <div class="form-field">
+        <label for="status_sanitario">Status sanitario</label>
+        <select class="select" id="status_sanitario" name="status_sanitario" required>
+          <option value="Saudavel" {% if sanidade.status_sanitario == "Saudavel" %}selected{% endif %}>Saudavel</option>
+          <option value="Em observacao" {% if sanidade.status_sanitario == "Em observacao" %}selected{% endif %}>Em observacao</option>
+          <option value="Em tratamento" {% if sanidade.status_sanitario == "Em tratamento" %}selected{% endif %}>Em tratamento</option>
+          <option value="Critico" {% if sanidade.status_sanitario == "Critico" %}selected{% endif %}>Critico</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="tipo_registro">Tipo de detalhe</label>
+        <select class="select" id="tipo_registro" name="tipo_registro">
+          <option value="">Sem detalhe</option>
+          <option value="exame">Exame</option>
+          <option value="vacina">Vacina</option>
+          <option value="medicamento">Medicamento</option>
+          <option value="enfermidade">Enfermidade</option>
+        </select>
+      </div>
+      <div class="form-field full">
+        <label for="observacoes">Observacoes</label>
+        <textarea class="textarea" id="observacoes" name="observacoes">{{ sanidade.observacoes|default:'' }}</textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="button secondary" href="{% url 'sanidade_lista' %}">Cancelar</a>
+      <button class="button" type="submit">Salvar registro</button>
+    </div>
+  </form>
+{% endblock %}
