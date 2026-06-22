@@ -15,6 +15,9 @@
           <option value="0" {% if request.GET.ativo == "0" %}selected{% endif %}>Inativos</option>
         </select>
         <button class="button" type="submit">Filtrar</button>
+        {% if request.GET.q or request.GET.ativo %}
+          <a class="button secondary" href="?">Limpar</a>
+        {% endif %}
       </div>
       <a class="button" href="{{ criar_url }}">Novo cadastro</a>
     </form>
@@ -43,8 +46,7 @@
                   <span class="badge danger">Inativo</span>
                 {% endif %}
               </td>
-              <td>
-                <a class="button secondary" href="{{ item.detalhe_url }}">Detalhes</a>
+              <td class="acoes-col">
                 <a class="button secondary" href="{{ item.editar_url }}">Editar</a>
                 <a class="button danger" href="{{ item.excluir_url }}">Excluir</a>
               </td>
@@ -59,5 +61,17 @@
         </tbody>
       </table>
     </div>
+
+    {% if is_paginated %}
+      <nav class="pagination" aria-label="Paginacao">
+        {% if page_obj.has_previous %}
+          <a class="button secondary" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.ativo %}ativo={{ request.GET.ativo }}&{% endif %}page={{ page_obj.previous_page_number }}">Anterior</a>
+        {% endif %}
+        <span class="pagination-info">Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a class="button secondary" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.ativo %}ativo={{ request.GET.ativo }}&{% endif %}page={{ page_obj.next_page_number }}">Proxima</a>
+        {% endif %}
+      </nav>
+    {% endif %}
   </section>
 {% endblock %}

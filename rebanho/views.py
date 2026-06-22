@@ -1,7 +1,10 @@
+from datetime import timedelta
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 
 from .forms import (
@@ -149,20 +152,26 @@ class AnimalListView(TabelaListView):
         queryset = Animal.objects.select_related('rebanho')
         busca = self.request.GET.get('q')
         rebanho = self.request.GET.get('rebanho')
+        status = self.request.GET.get('status')
+        ativo = self.request.GET.get('ativo')
         if busca:
             queryset = queryset.filter(
                 Q(identificacao__icontains=busca)
                 | Q(raca__icontains=busca)
-                | Q(status_saude__icontains=busca)
             )
         if rebanho:
             queryset = queryset.filter(rebanho_id=rebanho)
+        if status:
+            queryset = queryset.filter(status_saude=status)
+        if ativo in ['0', '1']:
+            queryset = queryset.filter(ativo=ativo == '1')
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super(ListView, self).get_context_data(**kwargs)
         context['animais'] = self.get_queryset()
         context['rebanhos'] = Rebanho.objects.filter(ativo=True)
+        context['status_choices'] = Animal.StatusSaude.choices
         return context
 
 
@@ -478,4 +487,115 @@ class EnfermidadeCreateView(FormMensagemMixin, LoginRequiredMixin, CreateView):
 class EnfermidadeUpdateView(EnfermidadeCreateView, UpdateView):
     titulo = 'Editar enfermidade'
 
-# Create your views here.
+
+# ── Relatórios ────────────────────────────────────────────────────────────────
+
+class RelatoriosIndexView(LoginRequiredMixin, TemplateView):
+    template_name = 'rebanho/relatorios/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_animais'] = Animal.objects.filter(ativo=True).count()
+        context['total_rebanhos'] = Rebanho.objects.filter(ativo=True).count()
+        context['total_produtos'] = Produto.objects.filter(ativo=True).count()
+        return context
+
+
+class RelatorioAnimalSelecionarView(LoginRequiredMixin, ListView):
+    model = Animal
+    template_name = 'rebanho/relatorios/animal_selecionar.html'
+    context_object_name = 'animais'
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = Animal.objects.select_related('rebanho').order_by('identificacao')
+        busca = self.request.GET.get('q')
+        rebanho = self.request.GET.get('rebanho')
+        if busca:
+            queryset = queryset.filter(
+                Q(identificacao__icontains=busca) | Q(raca__icontains=busca)
+            )
+        if rebanho:
+            queryset = queryset.filter(rebanho_id=rebanho)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['rebanhos'] = Rebanho.objects.filter(ativo=True)
+        return context
+
+
+class RelatorioAnimalView(LoginRequiredMixin, DetailView):
+    model = Animal
+    template_name = 'rebanho/relatorios/animal.html'
+    context_object_name = 'animal'
+
+    def get_queryset(self):
+        return Animal.objects.select_related('rebanho__talhao')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['sanidades'] = (
+            self.object.sanidades
+            .select_related('criado_por')
+            .prefetch_related('exames', 'vacinas', 'medicamentos', 'enfermidades')
+            .order_by('-data_registro')
+        )
+        context['data_geracao'] = timezone.localdate()
+        return context
+
+
+class RelatorioRebanhoSelecionarView(LoginRequiredMixin, ListView):
+    model = Rebanho
+    template_name = 'rebanho/relatorios/rebanho_selecionar.html'
+    context_object_name = 'rebanhos'
+
+    def get_queryset(self):
+        return Rebanho.objects.select_related('talhao').filter(ativo=True).order_by('nome')
+
+
+class RelatorioRebanhoView(LoginRequiredMixin, DetailView):
+    model = Rebanho
+    template_name = 'rebanho/relatorios/rebanho.html'
+    context_object_name = 'rebanho'
+
+    def get_queryset(self):
+        return Rebanho.objects.select_related('talhao')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        animais = self.object.animais.order_by('identificacao')
+        context['animais'] = animais
+        context['alimentos'] = (
+            self.object.alimentos
+            .select_related('produto')
+            .order_by('-data_fornecimento')[:30]
+        )
+        context['total_animais'] = animais.count()
+        context['animais_saudaveis'] = animais.filter(status_saude='Saudavel').count()
+        context['animais_observacao'] = animais.filter(status_saude='Observacao').count()
+        context['animais_tratamento'] = animais.filter(status_saude='Tratamento').count()
+        context['animais_criticos'] = animais.filter(status_saude='Critico').count()
+        context['data_geracao'] = timezone.localdate()
+        return context
+
+
+class RelatorioEstoqueView(LoginRequiredMixin, TemplateView):
+    template_name = 'rebanho/relatorios/estoque.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        hoje = timezone.localdate()
+        produtos = Produto.objects.filter(ativo=True).order_by('nome')
+        context['produtos'] = produtos
+        context['total_produtos'] = produtos.count()
+        context['produtos_baixo_estoque'] = produtos.filter(quantidade_estoque__lte=5)
+        context['produtos_vencidos'] = produtos.filter(data_validade__lt=hoje)
+        limite_vencimento = hoje + timedelta(days=30)
+        context['produtos_vencendo'] = produtos.filter(
+            data_validade__gte=hoje,
+            data_validade__lte=limite_vencimento,
+        )
+        context['produtos_vencendo_limite'] = limite_vencimento
+        context['data_geracao'] = hoje
+        return context

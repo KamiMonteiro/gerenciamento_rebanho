@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Relatorios - Sistema de Gerenciamento de Rebanhos{% endblock %}
+{% block nav_relatorios %}active{% endblock %}
+{% block page_title %}Relatorios{% endblock %}
+{% block page_subtitle %}Gere relatorios detalhados por animal, rebanho ou estoque.{% endblock %}
+
+{% block content %}
+  <section class="section">
+    <div class="grid grid-3">
+
+      <a class="card relatorio-card" href="{% url 'relatorio_animal_selecionar' %}">
+        <div class="relatorio-icon">&#128004;</div>
+        <strong>Relatorio por Animal</strong>
+        <p>Ficha completa com dados cadastrais, historico sanitario, vacinas, exames, medicamentos e enfermidades.</p>
+        <span class="badge">{{ total_animais }} animal{{ total_animais|pluralize:"is" }} cadastrado{{ total_animais|pluralize:"s" }}</span>
+      </a>
+
+      <a class="card relatorio-card" href="{% url 'relatorio_rebanho_selecionar' %}">
+        <div class="relatorio-icon">&#128009;</div>
+        <strong>Relatorio por Rebanho</strong>
+        <p>Visao geral do rebanho com lista de animais, distribuicao por status de saude e historico de alimentacao.</p>
+        <span class="badge">{{ total_rebanhos }} rebanho{{ total_rebanhos|pluralize:"s" }} cadastrado{{ total_rebanhos|pluralize:"s" }}</span>
+      </a>
+
+      <a class="card relatorio-card" href="{% url 'relatorio_estoque' %}">
+        <div class="relatorio-icon">&#128230;</div>
+        <strong>Relatorio de Estoque</strong>
+        <p>Situacao completa do estoque de produtos: quantidades, validades, alertas de baixo estoque e produtos vencidos.</p>
+        <span class="badge">{{ total_produtos }} produto{{ total_produtos|pluralize:"s" }} em estoque</span>
+      </a>
+
+    </div>
+  </section>
+
+  <style>
+    .relatorio-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .relatorio-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 4px 20px rgba(47, 111, 78, 0.18);
+    }
+    .relatorio-icon {
+      font-size: 36px;
+      line-height: 1;
+    }
+    .relatorio-card strong {
+      font-size: 17px;
+      color: var(--text);
+    }
+    .relatorio-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+  </style>
+{% endblock %}

@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Relatorio de Estoque{% endblock %}
+{% block nav_relatorio_estoque %}active{% endblock %}
+{% block page_title %}Relatorio de Estoque{% endblock %}
+{% block page_subtitle %}Gerado em {{ data_geracao|date:"d/m/Y" }} &mdash; Situacao completa dos produtos cadastrados.{% endblock %}
+
+{% block content %}
+  <div class="print-toolbar">
+    <a class="button secondary" href="{% url 'relatorios' %}">Voltar</a>
+    <button class="button" onclick="window.print()">Imprimir / Salvar PDF</button>
+  </div>
+
+  <section class="section">
+    <div class="grid grid-4">
+      <article class="card metric">
+        <span>Total de produtos</span>
+        <strong>{{ total_produtos }}</strong>
+      </article>
+      <article class="card metric">
+        <span>Estoque baixo (ate 5 un.)</span>
+        <strong style="color: #8a5819;">{{ produtos_baixo_estoque|length }}</strong>
+        <small>{{ produtos_baixo_estoque|length }} produto{{ produtos_baixo_estoque|length|pluralize:"s" }}</small>
+      </article>
+      <article class="card metric">
+        <span>Vencendo em 30 dias</span>
+        <strong style="color: #7a4010;">{{ produtos_vencendo|length }}</strong>
+        <small>{{ produtos_vencendo|length }} produto{{ produtos_vencendo|length|pluralize:"s" }}</small>
+      </article>
+      <article class="card metric">
+        <span>Produtos vencidos</span>
+        <strong style="color: var(--danger);">{{ produtos_vencidos|length }}</strong>
+        <small>{{ produtos_vencidos|length }} produto{{ produtos_vencidos|length|pluralize:"s" }}</small>
+      </article>
+    </div>
+  </section>
+
+  {% if produtos_vencidos %}
+    <section class="section">
+      <div class="section-header">
+        <h2>Produtos Vencidos</h2>
+        <span class="badge danger">Requer atencao imediata</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Nome</th><th>Quantidade</th><th>Unidade</th><th>Validade</th><th>Fornecedor</th></tr>
+          </thead>
+          <tbody>
+            {% for produto in produtos_vencidos %}
+              <tr class="row-danger">
+                <td>{{ produto.nome }}</td>
+                <td>{{ produto.quantidade_estoque }}</td>
+                <td>{{ produto.unidade_medida }}</td>
+                <td>{{ produto.data_validade|date:"d/m/Y" }}</td>
+                <td>{{ produto.fornecedor|default:"—" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+
+  {% if produtos_baixo_estoque %}
+    <section class="section">
+      <div class="section-header">
+        <h2>Estoque Baixo</h2>
+        <span class="badge warning">Quantidade igual ou inferior a 5</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Nome</th><th>Quantidade</th><th>Unidade</th><th>Validade</th><th>Fornecedor</th></tr>
+          </thead>
+          <tbody>
+            {% for produto in produtos_baixo_estoque %}
+              <tr class="row-warning">
+                <td>{{ produto.nome }}</td>
+                <td><strong>{{ produto.quantidade_estoque }}</strong></td>
+                <td>{{ produto.unidade_medida }}</td>
+                <td>{{ produto.data_validade|date:"d/m/Y"|default:"—" }}</td>
+                <td>{{ produto.fornecedor|default:"—" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+
+  <section class="section">
+    <div class="section-header">
+      <h2>Todos os Produtos</h2>
+      <span class="badge">{{ total_produtos }} produto{{ total_produtos|pluralize:"s" }}</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Quantidade</th>
+            <th>Unidade</th>
+            <th>Validade</th>
+            <th>Fornecedor</th>
+            <th>Situacao</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for produto in produtos %}
+            <tr>
+              <td>{{ produto.nome }}</td>
+              <td>
+                {% if produto.quantidade_estoque <= 5 %}
+                  <strong style="color: #8a5819;">{{ produto.quantidade_estoque }}</strong>
+                {% else %}
+                  {{ produto.quantidade_estoque }}
+                {% endif %}
+              </td>
+              <td>{{ produto.unidade_medida }}</td>
+              <td>
+                {% if produto.data_validade %}
+                  {% if produto.data_validade < data_geracao %}
+                    <span class="badge danger">{{ produto.data_validade|date:"d/m/Y" }}</span>
+                  {% elif produto.data_validade <= produtos_vencendo_limite %}
+                    <span class="badge orange">{{ produto.data_validade|date:"d/m/Y" }}</span>
+                  {% else %}
+                    {{ produto.data_validade|date:"d/m/Y" }}
+                  {% endif %}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              <td>{{ produto.fornecedor|default:"—" }}</td>
+              <td>
+                {% if produto.ativo %}
+                  <span class="badge">Ativo</span>
+                {% else %}
+                  <span class="badge danger">Inativo</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">Nenhum produto cadastrado.</div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <style>
+    .print-toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .row-danger td {
+      background: #fff5f4;
+    }
+    .row-warning td {
+      background: #fffbf0;
+    }
+    @media print {
+      .print-toolbar, .sidebar, .topbar { display: none !important; }
+      .content { padding: 0 !important; }
+      .card { box-shadow: none !important; border: 1px solid #ccc !important; }
+    }
+  </style>
+{% endblock %}

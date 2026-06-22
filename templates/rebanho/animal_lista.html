@@ -9,14 +9,28 @@
   <section class="section">
     <form class="toolbar" method="get">
       <div class="search-form">
-        <input class="input" type="search" name="q" value="{{ request.GET.q }}" placeholder="Buscar animal">
+        <input class="input" type="search" name="q" value="{{ request.GET.q }}" placeholder="Buscar por identificacao ou raca">
         <select class="select" name="rebanho">
           <option value="">Todos os rebanhos</option>
           {% for rebanho in rebanhos %}
             <option value="{{ rebanho.id_rebanho }}" {% if request.GET.rebanho == rebanho.id_rebanho|stringformat:"s" %}selected{% endif %}>{{ rebanho.nome }}</option>
           {% endfor %}
         </select>
+        <select class="select" name="status">
+          <option value="">Todos os status de saude</option>
+          {% for valor, label in status_choices %}
+            <option value="{{ valor }}" {% if request.GET.status == valor %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <select class="select" name="ativo">
+          <option value="">Ativos e inativos</option>
+          <option value="1" {% if request.GET.ativo == "1" %}selected{% endif %}>Somente ativos</option>
+          <option value="0" {% if request.GET.ativo == "0" %}selected{% endif %}>Somente inativos</option>
+        </select>
         <button class="button" type="submit">Filtrar</button>
+        {% if request.GET.q or request.GET.rebanho or request.GET.status or request.GET.ativo %}
+          <a class="button secondary" href="{% url 'animal_lista' %}">Limpar</a>
+        {% endif %}
       </div>
       <a class="button" href="{% url 'animal_criar' %}">Novo animal</a>
     </form>
@@ -32,6 +46,7 @@
             <th>Peso</th>
             <th>Rebanho</th>
             <th>Saude</th>
+            <th>Status</th>
             <th>Acoes</th>
           </tr>
         </thead>
@@ -41,19 +56,37 @@
               <td>{{ animal.identificacao }}</td>
               <td>{{ animal.raca }}</td>
               <td>{{ animal.sexo }}</td>
-              <td>{{ animal.idade }}</td>
+              <td>{{ animal.idade }} ano{{ animal.idade|pluralize:"s" }}</td>
               <td>{{ animal.peso }} kg</td>
               <td>{{ animal.rebanho.nome }}</td>
-              <td><span class="badge">{{ animal.status_saude }}</span></td>
               <td>
+                {% if animal.status_saude == "Saudavel" %}
+                  <span class="badge">{{ animal.status_saude }}</span>
+                {% elif animal.status_saude == "Observacao" %}
+                  <span class="badge warning">{{ animal.status_saude }}</span>
+                {% elif animal.status_saude == "Tratamento" %}
+                  <span class="badge orange">{{ animal.status_saude }}</span>
+                {% else %}
+                  <span class="badge danger">{{ animal.status_saude }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if animal.ativo %}
+                  <span class="badge">Ativo</span>
+                {% else %}
+                  <span class="badge danger">Inativo</span>
+                {% endif %}
+              </td>
+              <td class="acoes-col">
                 <a class="button secondary" href="{% url 'animal_detalhe' animal.id_animal %}">Detalhes</a>
                 <a class="button secondary" href="{% url 'animal_editar' animal.id_animal %}">Editar</a>
+                <a class="button secondary" href="{% url 'relatorio_animal' animal.id_animal %}">Relatorio</a>
               </td>
             </tr>
           {% empty %}
             <tr>
-              <td colspan="8">
-                <div class="empty-state">Nenhum animal cadastrado.</div>
+              <td colspan="9">
+                <div class="empty-state">Nenhum animal encontrado com os filtros aplicados.</div>
               </td>
             </tr>
           {% endfor %}

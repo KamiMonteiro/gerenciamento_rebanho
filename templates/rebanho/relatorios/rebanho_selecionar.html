@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Selecionar Rebanho - Relatorios{% endblock %}
+{% block nav_relatorio_rebanho %}active{% endblock %}
+{% block page_title %}Relatorio por Rebanho{% endblock %}
+{% block page_subtitle %}Selecione o rebanho para gerar o relatorio completo.{% endblock %}
+
+{% block content %}
+  <section class="section">
+    <div class="grid grid-3">
+      {% for rebanho in rebanhos %}
+        <article class="card rebanho-card">
+          <div class="rebanho-card-header">
+            <strong>{{ rebanho.nome }}</strong>
+            <span class="badge">{{ rebanho.quantidade_animais }} animal{{ rebanho.quantidade_animais|pluralize:"is" }}</span>
+          </div>
+          <div class="rebanho-card-meta">
+            <span>Talhao: {{ rebanho.talhao.nome }}</span>
+            <span>Tipo: {{ rebanho.tipo_criacao }}</span>
+          </div>
+          <a class="button" href="{% url 'relatorio_rebanho' rebanho.id_rebanho %}">Gerar relatorio</a>
+        </article>
+      {% empty %}
+        <div class="card">
+          <div class="empty-state">Nenhum rebanho ativo cadastrado.</div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <style>
+    .rebanho-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .rebanho-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .rebanho-card-header strong {
+      font-size: 16px;
+    }
+    .rebanho-card-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+{% endblock %}

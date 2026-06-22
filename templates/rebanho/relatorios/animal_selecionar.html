@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Selecionar Animal - Relatorios{% endblock %}
+{% block nav_relatorio_animal %}active{% endblock %}
+{% block page_title %}Relatorio por Animal{% endblock %}
+{% block page_subtitle %}Selecione o animal para gerar o relatorio completo.{% endblock %}
+
+{% block content %}
+  <section class="section">
+    <form class="toolbar" method="get">
+      <div class="search-form">
+        <input class="input" type="search" name="q" value="{{ request.GET.q }}" placeholder="Buscar por identificacao ou raca">
+        <select class="select" name="rebanho">
+          <option value="">Todos os rebanhos</option>
+          {% for rebanho in rebanhos %}
+            <option value="{{ rebanho.id_rebanho }}" {% if request.GET.rebanho == rebanho.id_rebanho|stringformat:"s" %}selected{% endif %}>{{ rebanho.nome }}</option>
+          {% endfor %}
+        </select>
+        <button class="button" type="submit">Filtrar</button>
+        {% if request.GET.q or request.GET.rebanho %}
+          <a class="button secondary" href="?">Limpar</a>
+        {% endif %}
+      </div>
+    </form>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Identificacao</th>
+            <th>Raca</th>
+            <th>Sexo</th>
+            <th>Rebanho</th>
+            <th>Status de saude</th>
+            <th>Acao</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for animal in animais %}
+            <tr>
+              <td>{{ animal.identificacao }}</td>
+              <td>{{ animal.raca }}</td>
+              <td>{{ animal.sexo }}</td>
+              <td>{{ animal.rebanho.nome }}</td>
+              <td>
+                {% if animal.status_saude == "Saudavel" %}
+                  <span class="badge">{{ animal.status_saude }}</span>
+                {% elif animal.status_saude == "Observacao" %}
+                  <span class="badge warning">{{ animal.status_saude }}</span>
+                {% elif animal.status_saude == "Tratamento" %}
+                  <span class="badge orange">{{ animal.status_saude }}</span>
+                {% else %}
+                  <span class="badge danger">{{ animal.status_saude }}</span>
+                {% endif %}
+              </td>
+              <td>
+                <a class="button" href="{% url 'relatorio_animal' animal.id_animal %}">Gerar relatorio</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">Nenhum animal encontrado.</div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if is_paginated %}
+      <nav class="pagination" aria-label="Paginacao">
+        {% if page_obj.has_previous %}
+          <a class="button secondary" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.rebanho %}rebanho={{ request.GET.rebanho }}&{% endif %}page={{ page_obj.previous_page_number }}">Anterior</a>
+        {% endif %}
+        <span class="pagination-info">Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a class="button secondary" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.rebanho %}rebanho={{ request.GET.rebanho }}&{% endif %}page={{ page_obj.next_page_number }}">Proxima</a>
+        {% endif %}
+      </nav>
+    {% endif %}
+  </section>
+{% endblock %}

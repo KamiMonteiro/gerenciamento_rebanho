@@ -369,9 +369,55 @@
       color: #8a5819;
     }
 
+    .badge.orange {
+      background: #fde8cc;
+      color: #7a4010;
+    }
+
     .badge.danger {
       background: #ffe4df;
       color: #94382f;
+    }
+
+    .message {
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      background: #e6f2ea;
+      color: var(--primary-dark);
+      border-left: 4px solid var(--primary);
+    }
+
+    .message.error {
+      background: #ffe4df;
+      color: #94382f;
+      border-color: var(--danger);
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      justify-content: center;
+    }
+
+    .pagination-info {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .acoes-col {
+      white-space: nowrap;
+    }
+
+    .acoes-col .button {
+      margin-right: 4px;
+      font-size: 13px;
+      min-height: 34px;
+      padding: 7px 10px;
     }
 
     .form-grid {
@@ -515,6 +561,16 @@
         </div>
 
         <div class="menu-group">
+          <button class="menu-group-trigger" type="button">Relatorios</button>
+          <div class="menu-group-menu">
+            <a class="nav-link {% block nav_relatorios %}{% endblock %}" href="{% url 'relatorios' %}">Visao geral</a>
+            <a class="nav-link {% block nav_relatorio_animal %}{% endblock %}" href="{% url 'relatorio_animal_selecionar' %}">Por animal</a>
+            <a class="nav-link {% block nav_relatorio_rebanho %}{% endblock %}" href="{% url 'relatorio_rebanho_selecionar' %}">Por rebanho</a>
+            <a class="nav-link {% block nav_relatorio_estoque %}{% endblock %}" href="{% url 'relatorio_estoque' %}">Estoque</a>
+          </div>
+        </div>
+
+        <div class="menu-group">
           <button class="menu-group-trigger" type="button">Acesso</button>
           <div class="menu-group-menu">
             <a class="nav-link {% block nav_usuarios %}{% endblock %}" href="{% url 'usuario_lista' %}">Usuarios</a>
@@ -542,7 +598,7 @@
         {% if messages %}
           <div class="section">
             {% for message in messages %}
-              <div class="card">{{ message }}</div>
+              <div class="message {% if message.tags == 'error' %}error{% endif %}">{{ message }}</div>
             {% endfor %}
           </div>
         {% endif %}

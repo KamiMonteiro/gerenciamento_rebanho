@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}Relatorio - {{ animal.identificacao }}{% endblock %}
+{% block nav_relatorio_animal %}active{% endblock %}
+{% block page_title %}Relatorio: {{ animal.identificacao }}{% endblock %}
+{% block page_subtitle %}Gerado em {{ data_geracao|date:"d/m/Y" }} &mdash; Rebanho: {{ animal.rebanho.nome }}{% endblock %}
+
+{% block content %}
+  <div class="print-toolbar">
+    <a class="button secondary" href="{% url 'relatorio_animal_selecionar' %}">Voltar</a>
+    <button class="button" onclick="window.print()">Imprimir / Salvar PDF</button>
+  </div>
+
+  <section class="section">
+    <div class="section-header">
+      <h2>Dados do Animal</h2>
+    </div>
+    <article class="card detail-list">
+      <div class="detail-item"><span>Identificacao</span><strong>{{ animal.identificacao }}</strong></div>
+      <div class="detail-item"><span>Rebanho</span><strong>{{ animal.rebanho.nome }}</strong></div>
+      <div class="detail-item"><span>Talhao</span><strong>{{ animal.rebanho.talhao.nome }}</strong></div>
+      <div class="detail-item"><span>Raca</span><strong>{{ animal.raca }}</strong></div>
+      <div class="detail-item"><span>Sexo</span><strong>{{ animal.sexo }}</strong></div>
+      <div class="detail-item"><span>Idade</span><strong>{{ animal.idade }} ano{{ animal.idade|pluralize:"s" }}</strong></div>
+      <div class="detail-item"><span>Peso</span><strong>{{ animal.peso }} kg</strong></div>
+      <div class="detail-item"><span>Data de nascimento</span><strong>{{ animal.data_nascimento|date:"d/m/Y"|default:"Nao informada" }}</strong></div>
+      <div class="detail-item"><span>Status de saude</span>
+        <strong>
+          {% if animal.status_saude == "Saudavel" %}
+            <span class="badge">{{ animal.status_saude }}</span>
+          {% elif animal.status_saude == "Observacao" %}
+            <span class="badge warning">{{ animal.status_saude }}</span>
+          {% elif animal.status_saude == "Tratamento" %}
+            <span class="badge orange">{{ animal.status_saude }}</span>
+          {% else %}
+            <span class="badge danger">{{ animal.status_saude }}</span>
+          {% endif %}
+        </strong>
+      </div>
+      <div class="detail-item"><span>Situacao</span><strong>{% if animal.ativo %}Ativo{% else %}Inativo{% endif %}</strong></div>
+      <div class="detail-item"><span>Data de cadastro</span><strong>{{ animal.data_cadastro|date:"d/m/Y H:i" }}</strong></div>
+      {% if animal.observacoes %}
+        <div class="detail-item full"><span>Observacoes</span><strong>{{ animal.observacoes }}</strong></div>
+      {% endif %}
+    </article>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <h2>Historico Sanitario</h2>
+      <span class="badge">{{ sanidades|length }} registro{{ sanidades|length|pluralize:"s" }}</span>
+    </div>
+
+    {% for sanidade in sanidades %}
+      <article class="card" style="margin-bottom: 16px;">
+        <div class="sanidade-header">
+          <div>
+            <strong>{{ sanidade.data_registro|date:"d/m/Y" }}</strong>
+            &nbsp;
+            {% if sanidade.status_sanitario == "Saudavel" %}
+              <span class="badge">{{ sanidade.status_sanitario }}</span>
+            {% elif sanidade.status_sanitario == "Em observacao" %}
+              <span class="badge warning">{{ sanidade.status_sanitario }}</span>
+            {% elif sanidade.status_sanitario == "Em tratamento" %}
+              <span class="badge orange">{{ sanidade.status_sanitario }}</span>
+            {% else %}
+              <span class="badge danger">{{ sanidade.status_sanitario }}</span>
+            {% endif %}
+          </div>
+          <span class="muted-text">Responsavel: {{ sanidade.criado_por.nome|default:sanidade.criado_por.username }}</span>
+        </div>
+        {% if sanidade.observacoes %}
+          <p class="sanidade-obs">{{ sanidade.observacoes }}</p>
+        {% endif %}
+
+        {% if sanidade.vacinas.all %}
+          <div class="sub-section">
+            <h4>Vacinas</h4>
+            <table>
+              <thead>
+                <tr><th>Nome</th><th>Dose</th><th>Aplicacao</th><th>Proxima dose</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                {% for v in sanidade.vacinas.all %}
+                  <tr>
+                    <td>{{ v.nome }}</td>
+                    <td>{{ v.dose|default:"—" }}</td>
+                    <td>{{ v.data_aplicacao|date:"d/m/Y"|default:"—" }}</td>
+                    <td>{{ v.proxima_dose|date:"d/m/Y"|default:"—" }}</td>
+                    <td>{{ v.status|default:"—" }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+
+        {% if sanidade.exames.all %}
+          <div class="sub-section">
+            <h4>Exames</h4>
+            <table>
+              <thead>
+                <tr><th>Nome</th><th>Tipo</th><th>Realizacao</th><th>Resultado</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                {% for e in sanidade.exames.all %}
+                  <tr>
+                    <td>{{ e.nome }}</td>
+                    <td>{{ e.tipo|default:"—" }}</td>
+                    <td>{{ e.data_realizacao|date:"d/m/Y"|default:"—" }}</td>
+                    <td>{{ e.resultado|default:"—" }}</td>
+                    <td>{{ e.status|default:"—" }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+
+        {% if sanidade.medicamentos.all %}
+          <div class="sub-section">
+            <h4>Medicamentos</h4>
+            <table>
+              <thead>
+                <tr><th>Nome</th><th>Dosagem</th><th>Periodo</th><th>Inicio</th><th>Fim</th></tr>
+              </thead>
+              <tbody>
+                {% for m in sanidade.medicamentos.all %}
+                  <tr>
+                    <td>{{ m.nome }}</td>
+                    <td>{{ m.dosagem|default:"—" }}</td>
+                    <td>{{ m.periodo_tratamento|default:"—" }}</td>
+                    <td>{{ m.data_inicio|date:"d/m/Y"|default:"—" }}</td>
+                    <td>{{ m.data_fim|date:"d/m/Y"|default:"—" }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+
+        {% if sanidade.enfermidades.all %}
+          <div class="sub-section">
+            <h4>Enfermidades</h4>
+            <table>
+              <thead>
+                <tr><th>Nome</th><th>Diagnostico</th><th>Gravidade</th><th>Status tratamento</th></tr>
+              </thead>
+              <tbody>
+                {% for en in sanidade.enfermidades.all %}
+                  <tr>
+                    <td>{{ en.nome }}</td>
+                    <td>{{ en.data_diagnostico|date:"d/m/Y"|default:"—" }}</td>
+                    <td>{{ en.gravidade|default:"—" }}</td>
+                    <td>{{ en.status_tratamento|default:"—" }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+
+        {% if not sanidade.vacinas.all and not sanidade.exames.all and not sanidade.medicamentos.all and not sanidade.enfermidades.all %}
+          <p class="muted-text" style="margin-top: 8px;">Nenhum detalhe registrado neste evento.</p>
+        {% endif %}
+      </article>
+    {% empty %}
+      <div class="card">
+        <div class="empty-state">Nenhum registro sanitario para este animal.</div>
+      </div>
+    {% endfor %}
+  </section>
+
+  <style>
+    .print-toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .sanidade-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .sanidade-obs {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .sub-section {
+      margin-top: 14px;
+    }
+    .sub-section h4 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+    .sub-section table {
+      min-width: 0;
+    }
+    .muted-text {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .detail-list.full {
+      grid-column: 1 / -1;
+    }
+    @media print {
+      .print-toolbar, .sidebar, .topbar { display: none !important; }
+      .content { padding: 0 !important; }
+      .card { box-shadow: none !important; border: 1px solid #ccc !important; }
+    }
+  </style>
+{% endblock %}

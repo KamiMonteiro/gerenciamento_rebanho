@@ -60,4 +60,11 @@ urlpatterns = [
     path('usuarios/novo/', views.UsuarioCreateView.as_view(), name='usuario_criar'),
     path('usuarios/<int:pk>/editar/', views.UsuarioUpdateView.as_view(), name='usuario_editar'),
     path('usuarios/<int:pk>/excluir/', views.ExcluirView.as_view(model=views.Usuario, success_url='/usuarios/'), name='usuario_excluir'),
+
+    path('relatorios/', views.RelatoriosIndexView.as_view(), name='relatorios'),
+    path('relatorios/animal/', views.RelatorioAnimalSelecionarView.as_view(), name='relatorio_animal_selecionar'),
+    path('relatorios/animal/<int:pk>/', views.RelatorioAnimalView.as_view(), name='relatorio_animal'),
+    path('relatorios/rebanho/', views.RelatorioRebanhoSelecionarView.as_view(), name='relatorio_rebanho_selecionar'),
+    path('relatorios/rebanho/<int:pk>/', views.RelatorioRebanhoView.as_view(), name='relatorio_rebanho'),
+    path('relatorios/estoque/', views.RelatorioEstoqueView.as_view(), name='relatorio_estoque'),
 ]

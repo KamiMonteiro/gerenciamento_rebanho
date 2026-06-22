@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Relatorio - {{ rebanho.nome }}{% endblock %}
+{% block nav_relatorio_rebanho %}active{% endblock %}
+{% block page_title %}Relatorio: {{ rebanho.nome }}{% endblock %}
+{% block page_subtitle %}Gerado em {{ data_geracao|date:"d/m/Y" }} &mdash; Talhao: {{ rebanho.talhao.nome }}{% endblock %}
+
+{% block content %}
+  <div class="print-toolbar">
+    <a class="button secondary" href="{% url 'relatorio_rebanho_selecionar' %}">Voltar</a>
+    <button class="button" onclick="window.print()">Imprimir / Salvar PDF</button>
+  </div>
+
+  <section class="section">
+    <div class="section-header">
+      <h2>Dados do Rebanho</h2>
+    </div>
+    <article class="card detail-list">
+      <div class="detail-item"><span>Nome</span><strong>{{ rebanho.nome }}</strong></div>
+      <div class="detail-item"><span>Talhao</span><strong>{{ rebanho.talhao.nome }}</strong></div>
+      <div class="detail-item"><span>Localizacao do talhao</span><strong>{{ rebanho.talhao.localizacao }}</strong></div>
+      <div class="detail-item"><span>Tipo de criacao</span><strong>{{ rebanho.tipo_criacao }}</strong></div>
+      <div class="detail-item"><span>Quantidade registrada</span><strong>{{ rebanho.quantidade_animais }}</strong></div>
+      <div class="detail-item"><span>Situacao</span><strong>{% if rebanho.ativo %}Ativo{% else %}Inativo{% endif %}</strong></div>
+      {% if rebanho.observacoes %}
+        <div class="detail-item full"><span>Observacoes</span><strong>{{ rebanho.observacoes }}</strong></div>
+      {% endif %}
+    </article>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <h2>Resumo de Saude</h2>
+    </div>
+    <div class="grid grid-4">
+      <article class="card metric">
+        <span>Total de animais</span>
+        <strong>{{ total_animais }}</strong>
+      </article>
+      <article class="card metric">
+        <span>Saudaveis</span>
+        <strong style="color: var(--primary);">{{ animais_saudaveis }}</strong>
+      </article>
+      <article class="card metric">
+        <span>Em observacao / tratamento</span>
+        <strong style="color: #8a5819;">{{ animais_observacao|add:animais_tratamento }}</strong>
+      </article>
+      <article class="card metric">
+        <span>Criticos</span>
+        <strong style="color: var(--danger);">{{ animais_criticos }}</strong>
+      </article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <h2>Lista de Animais</h2>
+      <span class="badge">{{ total_animais }} animal{{ total_animais|pluralize:"is" }}</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Identificacao</th>
+            <th>Raca</th>
+            <th>Sexo</th>
+            <th>Idade</th>
+            <th>Peso</th>
+            <th>Status de saude</th>
+            <th>Situacao</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for animal in animais %}
+            <tr>
+              <td>{{ animal.identificacao }}</td>
+              <td>{{ animal.raca }}</td>
+              <td>{{ animal.sexo }}</td>
+              <td>{{ animal.idade }} ano{{ animal.idade|pluralize:"s" }}</td>
+              <td>{{ animal.peso }} kg</td>
+              <td>
+                {% if animal.status_saude == "Saudavel" %}
+                  <span class="badge">{{ animal.status_saude }}</span>
+                {% elif animal.status_saude == "Observacao" %}
+                  <span class="badge warning">{{ animal.status_saude }}</span>
+                {% elif animal.status_saude == "Tratamento" %}
+                  <span class="badge orange">{{ animal.status_saude }}</span>
+                {% else %}
+                  <span class="badge danger">{{ animal.status_saude }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if animal.ativo %}
+                  <span class="badge">Ativo</span>
+                {% else %}
+                  <span class="badge danger">Inativo</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7">
+                <div class="empty-state">Nenhum animal vinculado a este rebanho.</div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <h2>Historico de Alimentacao</h2>
+      <span class="muted-text">Ultimos 30 registros</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Alimento</th>
+            <th>Tipo</th>
+            <th>Quantidade</th>
+            <th>Produto vinculado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for alimento in alimentos %}
+            <tr>
+              <td>{{ alimento.data_fornecimento|date:"d/m/Y" }}</td>
+              <td>{{ alimento.nome }}</td>
+              <td>{{ alimento.tipo }}</td>
+              <td>{{ alimento.quantidade }}</td>
+              <td>{{ alimento.produto.nome|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5">
+                <div class="empty-state">Nenhum registro de alimentacao para este rebanho.</div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <style>
+    .print-toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .muted-text {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .detail-list.full {
+      grid-column: 1 / -1;
+    }
+    @media print {
+      .print-toolbar, .sidebar, .topbar { display: none !important; }
+      .content { padding: 0 !important; }
+      .card { box-shadow: none !important; border: 1px solid #ccc !important; }
+    }
+  </style>
+{% endblock %}
