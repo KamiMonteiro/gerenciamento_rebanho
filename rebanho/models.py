@@ -148,7 +148,15 @@ class Animal(RegistroBase):
     identificacao = models.CharField(max_length=80, unique=True)
     raca = models.CharField(max_length=80)
     sexo = models.CharField(max_length=10, choices=Sexo.choices)
-    idade = models.PositiveIntegerField(default=0)
+    @property
+    def idade(self):
+        if not self.data_nascimento:
+            return 0
+        from django.utils import timezone
+        hoje = timezone.localdate()
+        return hoje.year - self.data_nascimento.year - (
+            (hoje.month, hoje.day) < (self.data_nascimento.month, self.data_nascimento.day)
+        )
     peso = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     data_nascimento = models.DateField(null=True, blank=True)
     status_saude = models.CharField(

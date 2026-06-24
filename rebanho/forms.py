@@ -107,7 +107,6 @@ class AnimalForm(StyledModelForm):
             'identificacao',
             'raca',
             'sexo',
-            'idade',
             'peso',
             'data_nascimento',
             'status_saude',
@@ -115,17 +114,6 @@ class AnimalForm(StyledModelForm):
             'ativo',
         ]
         widgets = {'data_nascimento': forms.DateInput(attrs={'type': 'date'})}
-
-    def clean(self):
-        cleaned_data = super().clean()
-        data_nascimento = cleaned_data.get('data_nascimento')
-
-        if data_nascimento:
-            today = timezone.localdate()
-            idade = today.year - data_nascimento.year - ((today.month, today.day) < (data_nascimento.month, data_nascimento.day))
-            cleaned_data['idade'] = idade
-
-        return cleaned_data
 
 
 class SanidadeForm(StyledModelForm):

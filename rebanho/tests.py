@@ -48,7 +48,7 @@ class FormValidationTests(TestCase):
             identificacao='A-001',
             raca='Holandesa',
             sexo=Animal.Sexo.MACHO,
-            idade=2,
+
             peso=150,
             data_nascimento=timezone.localdate() - timedelta(days=365),
             status_saude=Animal.StatusSaude.SAUDAVEL,
@@ -95,7 +95,7 @@ class FormValidationTests(TestCase):
             'identificacao': 'A-002',
             'raca': 'Holandesa',
             'sexo': Animal.Sexo.MACHO,
-            'idade': 2,
+
             'peso': -5,
             'data_nascimento': (timezone.localdate() - timedelta(days=365)).strftime('%Y-%m-%d'),
             'status_saude': Animal.StatusSaude.SAUDAVEL,
@@ -113,7 +113,7 @@ class FormValidationTests(TestCase):
             'identificacao': 'A-003',
             'raca': 'Holandesa',
             'sexo': Animal.Sexo.FEMEA,
-            'idade': 2,
+
             'peso': 150,
             'data_nascimento': tomorrow.strftime('%Y-%m-%d'),
             'status_saude': Animal.StatusSaude.SAUDAVEL,
@@ -190,23 +190,9 @@ class FormValidationTests(TestCase):
         self.assertEqual(form['data_nascimento'].value(), self.animal.data_nascimento)
         self.assertIn(f"value=\"{self.animal.data_nascimento.strftime('%Y-%m-%d')}\"", form['data_nascimento'].as_widget())
 
-    def test_animal_form_calcula_idade_automaticamente(self):
+    def test_animal_idade_calculada_automaticamente(self):
         birth_date = timezone.localdate() - timedelta(days=365 * 3 + 100)
-        form = AnimalForm(data={
-            'rebanho': self.rebanho.id_rebanho,
-            'identificacao': 'A-004',
-            'raca': 'Holandesa',
-            'sexo': Animal.Sexo.MACHO,
-            'idade': 0,
-            'peso': 150,
-            'data_nascimento': birth_date.strftime('%Y-%m-%d'),
-            'status_saude': Animal.StatusSaude.SAUDAVEL,
-            'observacoes': '',
-            'ativo': True,
-        })
-
-        self.assertTrue(form.is_valid())
-        animal = form.save()
+        animal = Animal(data_nascimento=birth_date)
         today = timezone.localdate()
         expected_age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
         self.assertEqual(animal.idade, expected_age)
