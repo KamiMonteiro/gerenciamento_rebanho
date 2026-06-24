@@ -247,6 +247,7 @@ class AlimentoListView(TabelaListView):
 
 class RebanhoListView(TabelaListView):
     model = Rebanho
+    template_name = 'rebanho/rebanho_lista.html'
     titulo = 'Rebanhos'
     criar_url_name = 'rebanho_criar'
     editar_url_name = 'rebanho_editar'
@@ -257,7 +258,25 @@ class RebanhoListView(TabelaListView):
     campos_valores = ['nome', 'talhao', 'quantidade_animais', 'tipo_criacao']
 
     def get_queryset(self):
-        return super().get_queryset().select_related('talhao')
+        qs = super().get_queryset().select_related('talhao')
+        tipo = self.request.GET.get('tipo_criacao')
+        talhao = self.request.GET.get('talhao')
+        if tipo:
+            qs = qs.filter(tipo_criacao__icontains=tipo)
+        if talhao:
+            qs = qs.filter(talhao__id_talhao=talhao)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tipos_criacao'] = (
+            Rebanho.objects.filter(ativo=True)
+            .values_list('tipo_criacao', flat=True)
+            .distinct()
+            .order_by('tipo_criacao')
+        )
+        context['talhoes_disponiveis'] = Talhao.objects.filter(ativo=True).order_by('nome')
+        return context
 
 
 class TalhaoListView(TabelaListView):
@@ -551,7 +570,20 @@ class RelatorioRebanhoSelecionarView(LoginRequiredMixin, ListView):
     context_object_name = 'rebanhos'
 
     def get_queryset(self):
-        return Rebanho.objects.select_related('talhao').filter(ativo=True).order_by('nome')
+        qs = Rebanho.objects.select_related('talhao').filter(ativo=True).order_by('nome')
+        busca = self.request.GET.get('q', '').strip()
+        if busca:
+            qs = qs.filter(
+                Q(nome__icontains=busca) |
+                Q(tipo_criacao__icontains=busca) |
+                Q(talhao__nome__icontains=busca)
+            )
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['busca'] = self.request.GET.get('q', '')
+        return context
 
 
 class RelatorioRebanhoView(LoginRequiredMixin, DetailView):

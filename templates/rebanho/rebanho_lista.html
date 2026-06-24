@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titulo }} - Sistema de Gerenciamento de Rebanhos{% endblock %}
+{% block page_title %}{{ titulo|default:"Registros" }}{% endblock %}
+{% block page_subtitle %}Consulte, filtre e gerencie os cadastros do sistema.{% endblock %}
+
+{% block content %}
+  <section class="section">
+    <form class="toolbar" method="get">
+      <div class="search-form">
+        <input class="input" type="search" name="q" value="{{ request.GET.q }}" placeholder="Buscar por nome ou talhao">
+        <select class="select" name="tipo_criacao">
+          <option value="">Todos os tipos</option>
+          {% for tipo in tipos_criacao %}
+            <option value="{{ tipo }}" {% if request.GET.tipo_criacao == tipo %}selected{% endif %}>{{ tipo }}</option>
+          {% endfor %}
+        </select>
+        <select class="select" name="talhao">
+          <option value="">Todos os talhoes</option>
+          {% for t in talhoes_disponiveis %}
+            <option value="{{ t.id_talhao }}" {% if request.GET.talhao == t.id_talhao|stringformat:"s" %}selected{% endif %}>{{ t.nome }}</option>
+          {% endfor %}
+        </select>
+        <select class="select" name="ativo">
+          <option value="">Todos os status</option>
+          <option value="1" {% if request.GET.ativo == "1" %}selected{% endif %}>Ativos</option>
+          <option value="0" {% if request.GET.ativo == "0" %}selected{% endif %}>Inativos</option>
+        </select>
+        <button class="button" type="submit">Filtrar</button>
+        {% if request.GET.q or request.GET.ativo or request.GET.tipo_criacao or request.GET.talhao %}
+          <a class="button secondary" href="?">Limpar</a>
+        {% endif %}
+      </div>
+      <a class="button" href="{{ criar_url }}">Novo cadastro</a>
+    </form>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            {% for coluna in colunas %}
+              <th>{{ coluna }}</th>
+            {% endfor %}
+            <th>Status</th>
+            <th>Acoes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in itens %}
+            <tr>
+              {% for valor in item.valores %}
+                <td>{{ valor }}</td>
+              {% endfor %}
+              <td>
+                {% if item.ativo %}
+                  <span class="badge">Ativo</span>
+                {% else %}
+                  <span class="badge danger">Inativo</span>
+                {% endif %}
+              </td>
+              <td class="acoes-col">
+                <a class="button secondary" href="{{ item.editar_url }}">Editar</a>
+                <a class="button danger" href="{{ item.excluir_url }}">Excluir</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="{{ colunas|length|add:'2' }}">
+                <div class="empty-state">Nenhum registro encontrado.</div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if is_paginated %}
+      <nav class="pagination" aria-label="Paginacao">
+        {% if page_obj.has_previous %}
+          <a class="button secondary" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.tipo_criacao %}tipo_criacao={{ request.GET.tipo_criacao }}&{% endif %}{% if request.GET.talhao %}talhao={{ request.GET.talhao }}&{% endif %}{% if request.GET.ativo %}ativo={{ request.GET.ativo }}&{% endif %}page={{ page_obj.previous_page_number }}">Anterior</a>
+        {% endif %}
+        <span class="pagination-info">Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a class="button secondary" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.tipo_criacao %}tipo_criacao={{ request.GET.tipo_criacao }}&{% endif %}{% if request.GET.talhao %}talhao={{ request.GET.talhao }}&{% endif %}{% if request.GET.ativo %}ativo={{ request.GET.ativo }}&{% endif %}page={{ page_obj.next_page_number }}">Proxima</a>
+        {% endif %}
+      </nav>
+    {% endif %}
+  </section>
+{% endblock %}

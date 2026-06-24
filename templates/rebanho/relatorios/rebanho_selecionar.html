@@ -7,6 +7,16 @@
 
 {% block content %}
   <section class="section">
+    <form class="toolbar" method="get">
+      <div class="search-form">
+        <input class="input" type="search" name="q" value="{{ busca }}" placeholder="Buscar por nome, talhao ou tipo de criacao" autofocus>
+        <button class="button" type="submit">Filtrar</button>
+        {% if busca %}
+          <a class="button secondary" href="?">Limpar</a>
+        {% endif %}
+      </div>
+    </form>
+
     <div class="grid grid-3">
       {% for rebanho in rebanhos %}
         <article class="card rebanho-card">
