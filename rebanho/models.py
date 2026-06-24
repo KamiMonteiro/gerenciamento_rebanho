@@ -83,9 +83,12 @@ class Rebanho(RegistroBase):
         related_name='rebanho',
     )
     nome = models.CharField(max_length=120)
-    quantidade_animais = models.PositiveIntegerField(default=0)
     tipo_criacao = models.CharField(max_length=80)
     observacoes = models.TextField(blank=True)
+
+    @property
+    def quantidade_animais(self):
+        return self.animais.count()
 
     class Meta:
         verbose_name = 'Rebanho'

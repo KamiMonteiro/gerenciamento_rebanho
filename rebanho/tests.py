@@ -35,7 +35,6 @@ class FormValidationTests(TestCase):
         self.rebanho = Rebanho.objects.create(
             talhao=self.talhao,
             nome='Rebanho teste',
-            quantidade_animais=10,
             tipo_criacao='Pastagem',
         )
         self.usuario = Usuario.objects.create_user(

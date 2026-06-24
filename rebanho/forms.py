@@ -89,7 +89,7 @@ class TalhaoForm(StyledModelForm):
 class RebanhoForm(StyledModelForm):
     class Meta:
         model = Rebanho
-        fields = ['talhao', 'nome', 'quantidade_animais', 'tipo_criacao', 'observacoes', 'ativo']
+        fields = ['talhao', 'nome', 'tipo_criacao', 'observacoes', 'ativo']
 
 
 class AlimentoForm(StyledModelForm):

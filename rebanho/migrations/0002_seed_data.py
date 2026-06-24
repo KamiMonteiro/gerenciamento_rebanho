@@ -132,7 +132,6 @@ def criar_dados_iniciais(apps, schema_editor):
         r = Rebanho.objects.create(
             talhao=talhoes[i],
             nome=nome,
-            quantidade_animais=0,
             tipo_criacao=tipo,
             ativo=True,
         )
@@ -196,10 +195,6 @@ def criar_dados_iniciais(apps, schema_editor):
             ativo=True,
         )
         animais.append(a)
-
-    for r in rebanhos:
-        r.quantidade_animais = r.animais.count()
-        r.save(update_fields=["quantidade_animais"])
 
     # ----------------------------------------------------------------
     # 6. ALIMENTOS (35 registros)
